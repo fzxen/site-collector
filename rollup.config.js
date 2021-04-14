@@ -1,39 +1,50 @@
-import ts from "rollup-plugin-typescript2";
-import { terser } from "rollup-plugin-terser";
+import ts from "@rollup/plugin-typescript";
 import babel from "@rollup/plugin-babel";
+import dts from "rollup-plugin-dts";
+import pkg from "./package.json";
 
 const extensions = [".ts", ".js"];
 
 function genCommonPlugins() {
-  return [ts(), babel({ babelHelpers: "bundled", extensions })];
+  return [
+    ts({ declaration: false }),
+    babel({ babelHelpers: "bundled", extensions }),
+  ];
 }
 
 export default [
+  // * NPM Bundle: 不包含依赖
   {
     input: "src/index.ts",
-    output: {
-      file: "dist/site-collector.esm.js",
-      format: "esm",
-      globals: {
-        "ua-parser-js": "UAParser",
-        deepmerge: "merge",
+    output: [
+      {
+        file: "dist/site-collector.cjs.js",
+        format: "cjs",
+        globals: {
+          "ua-parser-js": "UAParser",
+          deepmerge: "merge",
+        },
       },
-    },
-    external: ["ua-parser-js", "deepmerge"],
+      {
+        file: "dist/site-collector.esm.js",
+        format: "esm",
+        globals: {
+          "ua-parser-js": "UAParser",
+          deepmerge: "merge",
+        },
+      },
+    ],
+    external: Object.keys(pkg.dependencies),
     plugins: [...genCommonPlugins()],
   },
+
+  // * dts
   {
-    input: "src/index.ts",
+    input: "./src/index.ts",
+    plugins: [dts()],
     output: {
-      file: "dist/site-collector.min.js",
-      name: "site-collector",
-      format: "umd",
-      globals: {
-        "ua-parser-js": "UAParser",
-        deepmerge: "merge",
-      },
+      file: "dist/index.d.ts",
+      format: "esm",
     },
-    external: ["ua-parser-js", "deepmerge"],
-    plugins: [...genCommonPlugins(), terser()],
   },
 ];

@@ -19,36 +19,34 @@ type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 function request(task: RequestTasks, method: RequestMethod = "GET") {
   const { url, properties, headers } = task;
 
-  return new Promise((resolve, reject) => {
-    try {
-      const xhr = new XMLHttpRequest();
+  try {
+    const xhr = new XMLHttpRequest();
 
-      xhr.open(method, url);
+    xhr.open(method, url);
 
-      Object.keys(headers).forEach((key) =>
-        xhr.setRequestHeader(key, headers[key])
-      );
+    Object.keys(headers).forEach((key) =>
+      xhr.setRequestHeader(key, headers[key])
+    );
 
-      xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 
-      xhr.addEventListener("load", resolve);
-      xhr.addEventListener("error", reject);
-      xhr.addEventListener("timeout", reject);
+    // xhr.addEventListener("load", resolve);
+    // xhr.addEventListener("error", reject);
+    // xhr.addEventListener("timeout", reject);
 
-      xhr.timeout = 5000;
+    xhr.timeout = 5000;
 
-      const data = JSON.stringify(
-        transformer ? transformer(properties) : properties
-      );
-      xhr.send(data);
-    } catch (err) {
-      reject(err);
-    }
-  });
+    const data = JSON.stringify(
+      transformer ? transformer(properties) : properties
+    );
+    xhr.send(data);
+  } catch (err) {
+    // reject(err);
+  }
 }
 
 export function requestMulti(task: RequestTasks) {
-  return request(task, "POST");
+  request(task, "POST");
 }
 
 export function useTransformer(fn: Transformer) {

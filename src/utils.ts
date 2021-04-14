@@ -1,3 +1,4 @@
+import deepmerge from "deepmerge";
 export interface PlainObj<T = any> {
   [props: string]: T;
 }
@@ -13,7 +14,7 @@ export function isPlainObj(target: unknown): target is PlainObj<any> {
   return getTypeof(target) === "object";
 }
 
-export function debounce(fn: Function, delay: number) {
+export function debounce<T extends Function>(fn: T, delay: number) {
   let timer: any;
   return function (...args: unknown[]) {
     if (timer) clearTimeout(timer);
@@ -22,3 +23,5 @@ export function debounce(fn: Function, delay: number) {
     }, delay);
   };
 }
+
+export const merge = deepmerge;

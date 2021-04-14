@@ -1,9 +1,8 @@
-import { PlainObj } from "./utils";
+import { PlainObj, merge } from "./utils";
 import { queueTask } from "./scheduler";
 import { createAutoTrack } from "./auto";
 import { useTransformer } from "./request";
 import UAParser from "ua-parser-js";
-import merge from "deepmerge";
 
 export interface TrackerOptions {
   url: string;

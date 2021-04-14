@@ -1,7 +1,7 @@
 import { queueTask } from "./scheduler";
 import type { TrackerOptions } from "./tracker";
 import type { RequestTask } from "./request";
-import merge from "deepmerge";
+import { PlainObj, merge } from "./utils";
 
 /**
  * 自动捕获数据
@@ -16,14 +16,56 @@ let global = {};
 // 自动捕获的 任务队列
 let autoQueue: RequestTask[] = [];
 
-// 异常
+// * 监听脚本
+window.onerror = function (message, source, lineno, colno, error) {
+  const task = {
+    url,
+    headers: {},
+    properties: merge.all([
+      {},
+      processDynamicGlobal(global),
+      {
+        _type: "SCRIPT_ERROR",
+        _level: "error",
+        message,
+        source,
+        lineno,
+        colno,
+        error,
+      },
+    ]),
+  };
+  if (hasTracker) {
+    queueTask(task);
+  } else autoQueue.push(task);
+};
+
+// * 监听资源加载
 window.addEventListener(
   "error",
-  (ev) => {
+  (error) => {
+    const target: any = error.target;
+    const name = target?.localName;
+    let sourceURL: string = "";
+    // link
+    if (name === "link") sourceURL = target?.href;
+    // img video script ...
+    else sourceURL = target?.src;
+    if (sourceURL.length <= 0) return;
+
     const task = {
       url,
       headers: {},
-      properties: merge.all([{}, global, ev]),
+      properties: merge.all([
+        {},
+        processDynamicGlobal(global),
+        {
+          _type: "SOURCES_FAILED",
+          _level: "error",
+          target: error.target,
+          sourceURL,
+        },
+      ]),
     };
     if (hasTracker) {
       queueTask(task);
@@ -32,7 +74,27 @@ window.addEventListener(
   true
 );
 
-// TODO 性能数据
+// * 监听未捕获的promise
+window.addEventListener(
+  "unhandledrejection",
+  (event) => {
+    const task = {
+      url,
+      headers: {},
+      properties: merge.all([
+        {},
+        processDynamicGlobal(global),
+        { _type: "UNCAUGHT_PROMISE", _level: "warn", reason: event.reason },
+      ]),
+    };
+    if (hasTracker) {
+      queueTask(task);
+    } else autoQueue.push(task);
+  },
+  true
+);
+
+// 性能数据
 
 export function createAutoTrack(opts: TrackerOptions) {
   return function autoTrack() {
@@ -42,9 +104,31 @@ export function createAutoTrack(opts: TrackerOptions) {
 
     // 将autoQueue 转移到 requestQueue
     autoQueue.forEach((task) => {
-      queueTask(merge(task, { url, properties: global, header: {} }));
+      queueTask(
+        merge(task, {
+          url,
+          properties: processDynamicGlobal(global),
+          header: {},
+        })
+      );
     });
     // 清空 autoQueue
     autoQueue.length = 0;
   };
+}
+
+function processDynamicGlobal(global: PlainObj) {
+  // 处理动态参数
+  return Object.keys(global).reduce<PlainObj>((t, c) => {
+    let value = global[c];
+    if (typeof value === "function") {
+      try {
+        value = value();
+      } catch {
+        value = undefined;
+      }
+    }
+    t[c] = value;
+    return t;
+  }, {});
 }

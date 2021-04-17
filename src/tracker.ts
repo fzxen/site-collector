@@ -6,6 +6,7 @@ import UAParser from "ua-parser-js";
 
 export interface TrackerOptions {
   url: string;
+  headers?: PlainObj;
   global?: PlainObj;
 }
 
@@ -28,9 +29,7 @@ function createDefaultGlobal() {
 }
 
 function processOptions(options: TrackerOptions) {
-  const global = Object.assign(options.global ?? {}, createDefaultGlobal());
-  const opts = Object.assign(options, { global });
-  return opts;
+  return merge(options, { global: createDefaultGlobal(), headers: {} });
 }
 
 export function createTracker(options: TrackerOptions): Tracker {
@@ -46,9 +45,9 @@ export function createTracker(options: TrackerOptions): Tracker {
 }
 
 function createTrack(opts: Required<TrackerOptions>) {
-  let { url, global } = opts;
+  let { url, global, headers } = opts;
 
-  return function (properties = {}, headers = {}) {
+  return function (properties = {}, trackHeaders = {}) {
     // 处理动态参数
     global = Object.keys(global).reduce<PlainObj>((t, c) => {
       let value = global[c];
@@ -62,6 +61,8 @@ function createTrack(opts: Required<TrackerOptions>) {
       t[c] = value;
       return t;
     }, {});
+
+    // TODO 有trackHeader 就不走 批量上报
 
     const task = {
       properties: merge.all([{}, global, properties]),

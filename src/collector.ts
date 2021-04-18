@@ -12,7 +12,12 @@ let _uid = 0;
 
 function standardizeOpts(opts: CollectorOptions) {
   return merge(opts, {
-    global: {},
+    headers: {},
+    global: {
+      _path: location.href,
+      _signalType: (navigator as any)?.connection?.effectiveType ?? "unknown",
+      _userAgent: navigator.userAgent,
+    },
   });
 }
 

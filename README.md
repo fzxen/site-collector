@@ -1,36 +1,108 @@
+<p align="center">
+  <img src="./resources/logo.png" width="256"/>
+</p>
 # site-collector
 
-`site-collector`是一个用于捕获异常数据、性能数据以及自定义数据的工具
+`site-collector` is a convenient tool for collecting all kinds of data of websites.
+## Simple Example
 
-## How to use?
+```typescript
+import { createCollector } from "site-collector"
 
-```javascript
-import { createTracker } from "site-collector"
+// pass config object
+const collector = createCollector({
 
-const tracker = createTracker({
-  url: "http://xxxx:xx/track"
-   // 自定义全局参数
-  global: {
+  // request properties
+  url: ""
+  headers: {},
 
-    // 静态参数
+  // global properties
+  global: {  
+
+    // static property
     signalType: "4G",
 
-    // 动态参数, 每次track都会执行函数
+    // dynamic property
+    // fn will be recalled when collect
     custom: () => store.custom
   }
 })
 
-// 开启自动上报 数据
-// 部分脚本错误和性能数据会自动捕获并上报
-tracker.autoTrack()
+// collect data
+collector.collect({ myProperty: 'value' })
+```
 
+## Multi Collector
 
-// 转换参数
-tracker.useTransformer((tasks) => {
-  // todo
-  return tasks
+```typescript
+import { createCollector } from "site-collector";
+
+const collectorA = createCollector({
+  url: "/a",
+});
+const collectorB = createCollector({
+  url: "/b",
+});
+
+collectorA.collect({ name: "zxfan" });
+collectorB.collect({ name: "king" });
+```
+
+Two request will be sent.
+
+## Advance
+
+### Override Config
+
+```typescript
+collector.useConfig({
+  url: ""
+  headers: {},
+  global: {}
 })
+```
 
-tracker.track({ uid: "xxxxx" })
+### Auto Collect
 
+set these key to `true`. collector will collect these data automatically.
+
+```typescript
+// all default false
+collector.useAuto({
+  scriptError: true,
+  resourcesError: true,
+  unhandledrejection: true,
+  xhrAndFetchError: true,
+  first: true,
+
+  // web-vitals
+  fcp: true,
+  lcp: true,
+  cls: true,
+  network: true,
+  fid: true
+})
+```
+
+Options description:
+
+- `scriptError`: script error will be caught by window.onerror
+- `resourcesError`: Error that failed to load resource
+- `unhandlerejection`: uncatched Promise error
+- `xhrAndFetchError`: status of xmlHttpRequest and fetch is not `200`
+- `first`: Time about page loading calculated by MutationObserver
+- `fcp`: First Contentful Paint
+- `lcp`: Largest Contentful Paint
+- `cls`: Cumlative Layout Shift
+- `fid`: First Input Delay
+- `network`: network data fetched by performance api(include ttfb)
+
+> Looking for more information about `fcp` `lcp`, Please read doc [web-vitals](https://www.npmjs.com/package/web-vitals)
+
+### Transform properties
+
+```typescript
+collector.useTransformer((task) => {
+  return task;
+});
 ```

@@ -1190,8 +1190,15 @@ function handleProperties(global, properties) {
 var _uid = 0;
 
 function standardizeOpts(opts) {
+  var _a, _b, _c;
+
   return merge(opts, {
-    global: {}
+    headers: {},
+    global: {
+      _path: location.href,
+      _signalType: (_c = (_b = (_a = navigator) === null || _a === void 0 ? void 0 : _a.connection) === null || _b === void 0 ? void 0 : _b.effectiveType) !== null && _c !== void 0 ? _c : "unknown",
+      _userAgent: navigator.userAgent
+    }
   });
 }
 

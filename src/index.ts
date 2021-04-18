@@ -1,1 +1,1 @@
-export { createTracker } from "./tracker";
+export { createCollector } from "./collector";

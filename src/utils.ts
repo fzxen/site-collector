@@ -1,4 +1,4 @@
-import deepmerge from "deepmerge";
+import deepmerge from "./libs/deepmerge.esm";
 export interface PlainObj<T = any> {
   [props: string]: T;
 }

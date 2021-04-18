@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SITE COLLECTOR</title>
+  </head>
+  <body>
+    <h1>Random Img</h1>
+    <p class="desc"></p>
+    <button class="btn">click</button>
+    <img src="https://source.unsplash.com/random" alt="" />
+
+    <script type="module">
+      import { createCollector } from "./site-collector.esm.js";
+
+      let id = 0;
+      const collector = createCollector({
+        url: "/aaa",
+        headers: {},
+        global: {
+          str: "this is a str",
+          id: () => id++,
+        },
+      });
+
+      collector.useTransformer((task) => {
+        console.log(task);
+        return task;
+      });
+
+      collector.useAuto({
+        scriptError: true,
+        resourcesError: true,
+        unhandledrejection: true,
+        lcp: true,
+      });
+      collector.collect({ name: "zxfan" });
+      collector.collect({ age: 12 });
+
+      document.querySelector(".desc").innerHTML = "<p>Description here!</p>";
+
+      document.querySelector(".btn").addEventListener("click", () => {
+        document.querySelector(".desc").innerHTML = `<p>click here!${id++}</p>`;
+      });
+    </script>
+  </body>
+</html>

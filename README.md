@@ -1,6 +1,7 @@
 <p align="center">
   <img src="./resources/logo.png" width="256"/>
 </p>
+
 # site-collector
 
 `site-collector` is a convenient tool for collecting all kinds of data of websites.

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./resources/logo.png" width="256"/>
+  <img src="./resources/logo.png" width="512"/>
 </p>
 
 # site-collector

@@ -54,23 +54,26 @@ export function createCollector(opts: CollectorOptions) {
       const { url, headers, global } = options;
 
       // process global
-      properties = Object.keys(global).reduce<PlainObj>((t, c) => {
-        // property will be ignore
-        // when user passed this property
-        if (t[c] !== undefined) return t;
+      properties = Object.keys(global).reduce<PlainObj>(
+        (t, c) => {
+          // property will be ignore
+          // when user passed this property
+          if (t[c] !== undefined) return t;
 
-        // dynamic property
-        let value = global[c];
-        if (typeof value === "function") {
-          try {
-            value = value();
-          } catch {
-            value = undefined;
+          // dynamic property
+          let value = global[c];
+          if (typeof value === "function") {
+            try {
+              value = value();
+            } catch {
+              value = undefined;
+            }
           }
-        }
-        t[c] = value;
-        return t;
-      }, properties);
+          t[c] = value;
+          return t;
+        },
+        { ...properties, ...{ _createTime: Date.now() } }
+      );
 
       const task = {
         url,

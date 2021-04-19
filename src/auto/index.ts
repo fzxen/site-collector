@@ -282,17 +282,20 @@ export function createRegister(uid: number, url: string) {
 }
 
 function handleProperties(global: PlainObj, properties: PlainObj) {
-  return Object.keys(global).reduce<PlainObj>((t, c) => {
-    if (t[c] !== undefined) return t;
-    let value = global[c];
-    if (typeof value === "function") {
-      try {
-        value = value();
-      } catch {
-        value = undefined;
+  return Object.keys(global).reduce<PlainObj>(
+    (t, c) => {
+      if (t[c] !== undefined) return t;
+      let value = global[c];
+      if (typeof value === "function") {
+        try {
+          value = value();
+        } catch {
+          value = undefined;
+        }
       }
-    }
-    t[c] = value;
-    return t;
-  }, properties);
+      t[c] = value;
+      return t;
+    },
+    { ...properties, ...{ _createTime: Date.now() } }
+  );
 }

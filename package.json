@@ -1,6 +1,6 @@
 {
   "name": "site-collector",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "./dist/site-collector.cjs.js",
   "module": "./dist/site-collector.esm.js",

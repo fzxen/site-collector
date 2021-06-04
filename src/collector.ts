@@ -6,6 +6,7 @@ export interface CollectorOptions {
   url: string;
   headers: PlainObj<string>;
   global?: PlainObj;
+  deprecateRate: number;
 }
 
 let _uid = 0;
@@ -18,6 +19,7 @@ function standardizeOpts(opts: CollectorOptions) {
       _signalType: (navigator as any)?.connection?.effectiveType ?? "unknown",
       _userAgent: navigator.userAgent,
     },
+    deprecateRate: 0,
   });
 }
 
@@ -28,6 +30,14 @@ export function createCollector(opts: CollectorOptions) {
   const uid = _uid++;
 
   const schedular = createSchedular(uid);
+  const originalQueueTask = schedular.queueTask;
+
+  // deprecate rate
+  schedular.queueTask = function (args: any) {
+    if (Math.random() < options.deprecateRate) return;
+    originalQueueTask(args);
+  };
+
   const { queueTask } = schedular;
 
   const registerAutoCollector = createRegister(uid, options.url);

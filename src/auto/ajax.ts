@@ -52,7 +52,9 @@ export function enableXhrAndFetch(fn: XhrAndFetchErrorFn) {
         const requestBody = this.requestBody;
 
         const target = ev?.currentTarget;
-        if (target && target.status !== 200) {
+
+        // track 4xx and 5xx
+        if (target && target.status >= 400) {
           const { status, statusText, response: responseBody } = target;
 
           fn({

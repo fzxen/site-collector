@@ -1184,7 +1184,9 @@ function handleProperties(global, properties) {
 
     t[c] = value;
     return t;
-  }, properties);
+  }, Object.assign(Object.assign({}, properties), {
+    _createTime: Date.now()
+  }));
 }
 
 var _uid = 0;
@@ -1198,7 +1200,8 @@ function standardizeOpts(opts) {
       _path: location.href,
       _signalType: (_c = (_b = (_a = navigator) === null || _a === void 0 ? void 0 : _a.connection) === null || _b === void 0 ? void 0 : _b.effectiveType) !== null && _c !== void 0 ? _c : "unknown",
       _userAgent: navigator.userAgent
-    }
+    },
+    deprecateRate: 0
   });
 }
 
@@ -1207,6 +1210,13 @@ function createCollector(opts) {
   var autoOptions;
   var uid = _uid++;
   var schedular = createSchedular(uid);
+  var originalQueueTask = schedular.queueTask; // deprecate rate
+
+  schedular.queueTask = function (args) {
+    if (Math.random() < options.deprecateRate) return;
+    originalQueueTask(args);
+  };
+
   var queueTask = schedular.queueTask;
   var registerAutoCollector = createRegister(uid, options.url);
 
@@ -1256,7 +1266,9 @@ function createCollector(opts) {
 
         t[c] = value;
         return t;
-      }, properties);
+      }, Object.assign(Object.assign({}, properties), {
+        _createTime: Date.now()
+      }));
       var task = {
         url: url,
         headers: headers,

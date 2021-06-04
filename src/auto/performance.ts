@@ -91,17 +91,17 @@ export function enableCls(fn: PerformanceFn) {
 export function enableMutationObserver(fn: PerformanceFn) {
   const origin = performance.timeOrigin;
 
-  const onMutate = debounce(() => {
-    let time = Date.now() - origin;
+  const onMutate = debounce((now: number) => {
+    let time = now - origin;
     observer.disconnect();
     fn({ time });
-  }, 5000);
+  }, 3000);
 
   setTimeout(() => {
     observer.disconnect();
   }, 10000);
 
-  const observer = new MutationObserver(onMutate);
+  const observer = new MutationObserver(() => onMutate(Date.now()));
 
   observer.observe(document.body, {
     childList: true,

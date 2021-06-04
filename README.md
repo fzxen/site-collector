@@ -59,9 +59,29 @@ Two request will be sent.
 collector.useConfig({
   url: ""
   headers: {},
-  global: {}
+  global: {},
 })
 ```
+
+### Deprecate Report
+
+set collector config
+
+```javascript
+const collector = createCollector({
+
+  // request properties
+  url: ""
+  headers: {},
+  global: {}, // global properties
+  deprecateRate: 1 // 0-1
+})
+```
+
+`deprecateRate`:
+
+- if set `1`, collector will deprecate all reports.
+- if set `0.5`, collector will deprecate half reports.
 
 ### Auto Collect
 
